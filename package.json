@@ -1,0 +1,32 @@
+{
+  "name": "saucedemo-playwright-framework",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright + TypeScript test automation framework for saucedemo.com \u2014 root-fixture POM, storageState auth reuse, layered projects, AI-assisted workflow",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
+    "test:smoke": "playwright test --grep @smoke",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "playwright",
+    "typescript",
+    "test-automation",
+    "e2e",
+    "page-object-model",
+    "saucedemo"
+  ],
+  "author": "wmln",
+  "license": "ISC",
+  "devDependencies": {
+    "@faker-js/faker": "^10.6.0",
+    "@playwright/test": "^1.59.1",
+    "@types/node": "^25.6.0",
+    "dotenv": "^17.4.2",
+    "typescript": "^6.0.3"
+  }
+}

@@ -1,0 +1,86 @@
+/*
+ * REVIEWER CANARY — not a real spec.
+ *
+ * Extension is .txt so this never enters the Playwright test glob or tsconfig.
+ * Purpose: regression check for .claude/skills/qa-test-reviewer/SKILL.md.
+ * After editing that skill, run it against this file and compare.
+ *
+ * EXPECTED: 7 required findings.
+ *
+ * Seeded violations:
+ *
+ *   1. Architecture   — imports from '@playwright/test' instead of
+ *                       fixtures/base.fixture.ts
+ *   2. Tags           — tag appended to the title string instead of the
+ *                       details object
+ *   3. Credentials    — hardcoded password instead of requireEnv()
+ *   4. Encapsulation  — reaches through the Page Object via loginPage.page
+ *   5. Async          — waitForTimeout()
+ *
+ * Seeded violation 1 necessarily produces TWO findings: the import itself, and
+ * the manual `new LoginPage(page)` instantiation it forces in every test body.
+ * These are separate checklist items under Architecture and are listed
+ * separately. Causally linked, independently counted. Hence 5 seeds, 6 findings.
+ *
+ * Finding 7 (added with the destination-page checklist item): CANARY-01 and
+ * CANARY-03 log in and then assert only toHaveURL. In a single-page app the URL
+ * changes before the page renders, so neither proves the inventory loaded.
+ * One finding, two locations. It was not seeded deliberately; the checklist
+ * grew to catch it, which is exactly the kind of baseline shift this file
+ * exists to record.
+ *
+ * NEGATIVE CONTROL: CANARY-04 carries no tag at all and must NOT be flagged.
+ * An untagged test is not a violation — LOGIN-02..05 are deliberately untagged.
+ * Only tag PLACEMENT is governed, not tag presence. A reviewer that flags
+ * CANARY-04 is over-flagging and the skill needs correcting.
+ *
+ * A pass may also emit BLUE suggestions beyond these 7. Suggestions are not part
+ * of the baseline; compare on the 7 required findings and the control.
+ *
+ * A run reporting the 7 required findings and leaving CANARY-04 alone is a pass.
+ */
+
+// VIOLATION 1 — bypasses the fixture chain
+import { test, expect } from '@playwright/test';
+import { LoginPage } from '../../pages/LoginPage';
+
+test.describe('Canary', () => {
+  // VIOLATION 2 — tag in the title instead of { tag: '@smoke' }
+  test('CANARY-01 valid credentials reach inventory @smoke', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.navigate();
+
+    // VIOLATION 3 — hardcoded credentials instead of requireEnv()
+    await loginPage.login('standard_user', 'secret_sauce');
+
+    await expect(page).toHaveURL(/inventory/);
+  });
+
+  test('CANARY-02 error message appears for bad credentials', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.navigate();
+    await loginPage.login('standard_user', 'nope');
+
+    // VIOLATION 4 — reaching through the Page Object into Playwright internals
+    await expect(loginPage.page).toHaveURL(/^(?!.*inventory).*$/);
+    await expect(loginPage.errorMessage).toBeVisible();
+  });
+
+  test('CANARY-03 inventory settles after login', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.navigate();
+    await loginPage.login('standard_user', 'secret_sauce');
+
+    // VIOLATION 5 — arbitrary wait
+    await page.waitForTimeout(3000);
+
+    await expect(page).toHaveURL(/inventory/);
+  });
+
+  // NEGATIVE CONTROL — untagged is fine. Must NOT be reported.
+  test('CANARY-04 login page exposes a username field', async ({ page }) => {
+    const loginPage = new LoginPage(page);
+    await loginPage.navigate();
+    await expect(loginPage.usernameInput).toBeVisible();
+  });
+});
