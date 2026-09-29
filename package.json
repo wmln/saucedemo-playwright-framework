@@ -21,7 +21,7 @@
     "saucedemo"
   ],
   "author": "wmln",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@faker-js/faker": "^10.6.0",
     "@playwright/test": "^1.59.1",
