@@ -152,3 +152,8 @@ The repo is set up to be worked on with [Claude Code](https://claude.com/claude-
 `.claude/skills/test-driven-development` (Jesse Vincent, obra/superpowers) are
 community skills included under their MIT licenses, which are kept alongside
 them.
+
+## License
+
+[MIT](LICENSE), except the third-party skills above, which keep their own
+licenses.
